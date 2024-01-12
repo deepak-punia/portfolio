@@ -569,8 +569,8 @@ const Experience = () => {
       // Adjust these multipliers to control sensitivity
     const sensitivity = { x: 0.1, y: 0.1 };
     // Map rotation rate to camera movement
-    state.camera.position.z += deviceOnt.gamma * sensitivity.x * delta;
-    state.camera.position.y += deviceOnt.beta * sensitivity.y * delta;
+    state.camera.position.z += deviceOnt.alpha * sensitivity.x * delta;
+    state.camera.position.y += deviceOnt.gamma * sensitivity.y * delta;
 
     // Smoothly interpolate back to original position
     state.camera.position.z *= 0.9; // Adjust for smoother return

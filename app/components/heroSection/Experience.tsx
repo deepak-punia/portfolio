@@ -543,23 +543,22 @@ const Experience = () => {
       windowSizes.height = window.innerHeight;
     });
 
-    window.addEventListener("deviceorientation", (e) => {
+    window.addEventListener("devicemotion", (e) => {
       //   deviceOnt.alpha = (e.alpha / 360) * 0.5;
       //   deviceOnt.beta = (e.beta / 180) * 0.5;
       //   deviceOnt.gamma = (e.gamma / 90) * 0.5;
-      if (!e.alpha || !e.beta || !e.gamma) {
+      if (!e.rotationRate) {
         return;
       }
-      deviceOnt.alpha = e.alpha > 180 ? (e.alpha - 360) / 180 : e.alpha / 360;
-      deviceOnt.beta = (e.beta - 90) / 90;
-      deviceOnt.gamma =
-        e.gamma > 180 ? (360 - e.gamma) / 180 : -(e.gamma / 360);
+      deviceOnt.alpha = e.rotationRate.alpha || 0
+      deviceOnt.beta = e.rotationRate.beta || 0
+      deviceOnt.gamma = e.rotationRate.gamma || 0
     });
 
     return () => {
       window.removeEventListener("mousemove", () => {});
       window.removeEventListener("resize", () => {});
-      window.removeEventListener("deviceorientation", () => {});
+      window.removeEventListener("devicemotion", () => {});
       window.removeEventListener("scroll", () => {});
     };
   }, []);
@@ -567,11 +566,21 @@ const Experience = () => {
   useFrame((state, delta) => {
     //change camera on move move
     if (deviceOnt.alpha && windowSizes.width < 768) {
-      const pX = deviceOnt.gamma ? deviceOnt.gamma : 0 * 2;
-      const pY = deviceOnt.beta ? deviceOnt.beta : 0 * 2;
+      // Adjust these multipliers to control sensitivity
+    const sensitivity = { x: 0.1, y: 0.1 };
+    // Map rotation rate to camera movement
+    state.camera.position.z += deviceOnt.gamma * sensitivity.x * delta;
+    state.camera.position.y += deviceOnt.beta * sensitivity.y * delta;
 
-      state.camera.position.z = -(pX - state.camera.position.z) * 0.7;
-      state.camera.position.y += (pY - state.camera.position.y) * 0.6;
+    // Smoothly interpolate back to original position
+    state.camera.position.z *= 0.9; // Adjust for smoother return
+    state.camera.position.y *= 0.9;
+
+    // Ensure the camera looks at a specific point (e.g., the origin)
+    state.camera.lookAt(0, 0, 0);
+
+    
+      
 
       //   console.log("pX-Mobile", pX);
       // console.log("pY-Mobile", pY);

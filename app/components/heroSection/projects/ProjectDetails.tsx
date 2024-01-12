@@ -4,7 +4,7 @@ import * as THREE from "three";
 import useProjectStore from "../../stores/useProject";
 import VideoMesh from "./VideoMesh";
 import DetailCard2 from "./DetailCard2";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import useisMobile from "../hooks/useisMobile";
 
 function getScrollPercentage() {
@@ -54,7 +54,6 @@ const ProjectDetails = () => {
   const onPointerOverGit = (e) => {
     e.stopPropagation();
     document.body.style.cursor = "pointer";
-    
   };
 
   const onPointerOutGit = (e) => {
@@ -65,11 +64,13 @@ const ProjectDetails = () => {
   useEffect(() => {
     window.addEventListener("scroll", (e) => {
       scrollPer.current = getScrollPercentage();
-      
-      if (scrollPer.current <= (isMobile ?70 : 85)  || scrollPer.current >= (isMobile ? 78 : 95)) {
+
+      if (
+        scrollPer.current <= (isMobile ? 70 : 85) ||
+        scrollPer.current >= (isMobile ? 78 : 95)
+      ) {
         setVisible();
       }
-      
     });
 
     return () => {
@@ -97,7 +98,19 @@ const ProjectDetails = () => {
         />
       </Plane>
 
-      <VideoMesh position={isMobile ? [0, 0.7, 11.5] : [0, 0.7, 12]} scale={isMobile ? 1 : 1.75} videoUrl={project.video} />
+      <Suspense
+        fallback={
+          <Html center>
+            <div className="custom-loader"></div>
+          </Html>
+        }
+      >
+        <VideoMesh
+          position={isMobile ? [0, 0.7, 11.5] : [0, 0.7, 12]}
+          scale={isMobile ? 1 : 1.75}
+          videoUrl={project.video}
+        />
+      </Suspense>
 
       <Text
         position={[0, isMobile ? 1.6 : 3.95, isMobile ? 14.25 : 15]}
@@ -130,7 +143,7 @@ const ProjectDetails = () => {
         position={isMobile ? [0, -0.68, 14.22] : [0, -5.68, 8]}
         rotation={[0, -Math.PI * 0.5, 0]}
         onClick={() => {
-            window.open(project.sourceCode, '_blank', 'noreferrer')
+          window.open(project.sourceCode, "_blank", "noreferrer");
         }}
       >
         <meshStandardMaterial map={textureGit} transparent />

@@ -547,6 +547,7 @@ const Experience = () => {
       //   deviceOnt.alpha = (e.alpha / 360) * 0.5;
       //   deviceOnt.beta = (e.beta / 180) * 0.5;
       //   deviceOnt.gamma = (e.gamma / 90) * 0.5;
+      
       if (!e.rotationRate) {
         return;
       }
@@ -564,13 +565,20 @@ const Experience = () => {
   }, []);
 
   useFrame((state, delta) => {
+    
     //change camera on move move
     if (deviceOnt.alpha && windowSizes.width < 768) {
       // Adjust these multipliers to control sensitivity
     const sensitivity = { x: 0.1, y: 0.1 };
+    // Dead zone threshold
+    const deadZone = 0.1;
+    // Apply dead zone
+    let dx = Math.abs(deviceOnt.beta) > deadZone ? deviceOnt.gamma : 0;
+    let dy = Math.abs(deviceOnt.alpha) > deadZone ? deviceOnt.beta : 0;
+
     // Map rotation rate to camera movement
-    state.camera.position.z += deviceOnt.beta * sensitivity.x * delta;
-    state.camera.position.y += deviceOnt.alpha * sensitivity.y * delta;
+    state.camera.position.z += dx * sensitivity.x * delta;
+    state.camera.position.y += dy * sensitivity.y * delta;
 
     // Smoothly interpolate back to original position
     state.camera.position.z *= 0.9; // Adjust for smoother return
@@ -615,7 +623,7 @@ const Experience = () => {
         Math.sin(state.clock.elapsedTime * 2.3) * 0.2 - 1.11;
     }
 
-    console.log(scrollPer.current);
+    // console.log(scrollPer.current);
     
     //Animations based on scroll percentage
     //Scroll 1% - 10%

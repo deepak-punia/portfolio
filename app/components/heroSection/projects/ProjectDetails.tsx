@@ -33,7 +33,7 @@ function getScrollPercentage() {
   return scrollPercentage;
 }
 
-const ProjectDetails = () => {
+const ProjectDetails = ({historyPushed}) => {
   const isMobile = window.innerWidth >= 768;
   const texture = useLoader(THREE.TextureLoader, "./images/left.png");
   const textureGit = useLoader(THREE.TextureLoader, "./images/github.png");
@@ -61,15 +61,20 @@ const ProjectDetails = () => {
   };
 
   const scrollPer = useRef(0);
+  
   useEffect(() => {
-    // Push a new entry into the history stack
-    window.history.pushState(null, document.title, window.location.href);
+    if (!historyPushed.current) {
+      // Push a new entry into the history stack
+      window.history.pushState(null, document.title, window.location.href);
+      historyPushed.current = true;
+    }
 
     // Define the function to execute when the back button is pressed
     const handleBackButton = (event) => {
       
       // Your custom logic here
       setVisible();
+      historyPushed.current = false;
       // Display a warning message
 
       // Push it again in the history stack, effectively "ignoring" the back action

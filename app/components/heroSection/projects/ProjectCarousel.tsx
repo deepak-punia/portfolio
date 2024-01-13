@@ -6,11 +6,12 @@ import RotationControl from "./RotationControl";
 import useProjectStore from "../../stores/useProject";
 import ProjectDetails from "./ProjectDetails";
 import { useGesture } from "@use-gesture/react";
-import useisMobile from "../hooks/useisMobile";
 
 
 const ProjectCarousel = ({ projects, selectedProjectRef }) => {
   const isMobile = window.innerWidth >= 768;
+  // to keeo track of histry pushed into broswer stack
+  const historyPushed = useRef(false);
   const visible = useProjectStore((state) => state.visible);
   const groupRef = useRef();
   const allgroupRef = useRef();
@@ -92,7 +93,7 @@ const ProjectCarousel = ({ projects, selectedProjectRef }) => {
         />
 
         {/* Project Details */}
-        {visible && <ProjectDetails />}
+        {visible && <ProjectDetails historyPushed={historyPushed} />}
       </group>
     </>
   );

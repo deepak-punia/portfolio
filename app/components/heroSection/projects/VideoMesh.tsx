@@ -17,7 +17,7 @@ const VideoMesh = ({ videoUrl, scale, position }) => {
     video.load();
     video.onloadeddata = (event) => {
       loading.current = false;
-      console.log("Video Loaded!");
+
     };
     video.play();
     video.crossOrigin = "anonymous";

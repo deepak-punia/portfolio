@@ -62,6 +62,23 @@ const ProjectDetails = () => {
 
   const scrollPer = useRef(0);
   useEffect(() => {
+    // Push a new entry into the history stack
+    window.history.pushState(null, document.title, window.location.href);
+
+    // Define the function to execute when the back button is pressed
+    const handleBackButton = (event) => {
+      
+      // Your custom logic here
+      setVisible();
+      // Display a warning message
+
+      // Push it again in the history stack, effectively "ignoring" the back action
+      window.history.pushState(null, document.title, window.location.href);
+      
+    };
+    // Add event listener for popstate
+    window.addEventListener('popstate', handleBackButton);
+
     window.addEventListener("scroll", (e) => {
       scrollPer.current = getScrollPercentage();
 
@@ -75,6 +92,7 @@ const ProjectDetails = () => {
 
     return () => {
       window.removeEventListener("scroll", () => {});
+      window.removeEventListener('popstate', handleBackButton);
     };
   }, []);
 

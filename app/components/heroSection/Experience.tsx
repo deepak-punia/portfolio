@@ -556,8 +556,8 @@ const Experience = () => {
       const deadZone = 0.1;
       // Apply dead zone
       let dx = Math.abs(deviceOnt.beta) > deadZone ? deviceOnt.beta : 0;
-      let dy = -Math.abs(deviceOnt.alpha) > deadZone ? deviceOnt.alpha : 0;
-
+      let dy = Math.abs(deviceOnt.alpha) > deadZone ? - deviceOnt.alpha : 0;
+      
       // Map rotation rate to camera movement
       state.camera.position.z += dx * sensitivity.x * delta;
       state.camera.position.y += dy * sensitivity.y * delta;

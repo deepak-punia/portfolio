@@ -1,17 +1,11 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import { Perf } from "r3f-perf";
 import { useControls } from "leva";
 import * as THREE from "three";
 import {
-  OrbitControls,
-  useHelper,
-  RoundedBox,
   useGLTF,
   Html,
-  useProgress,
-  Stage,
-  Plane,
   Text,
 } from "@react-three/drei";
 import { useFrame, useLoader } from "@react-three/fiber";
@@ -22,6 +16,10 @@ import ProjectCarousel from "./projects/ProjectCarousel";
 import ProjectDetails from "./ProjectDetails";
 import SocialIcons from "./SocialIcons";
 import ContactForm from "./ContactForm";
+import WebModel from "./WebModel";
+
+// Types import
+import { Group } from 'three';
 
 // scoll percentage function
 function getScrollPercentage() {
@@ -52,11 +50,11 @@ function getScrollPercentage() {
 //fade in/out with scrool
 const updateGroupOpacity = (
   group,
-  fadeInStart,
-  fadeInEnd,
-  fadeOutStart,
-  fadeOutEnd,
-  scrollPer
+  fadeInStart : number,
+  fadeInEnd : number,
+  fadeOutStart: number,
+  fadeOutEnd: number,
+  scrollPer: number
 ) => {
   if (group.current) {
     let opacity = 1;
@@ -84,10 +82,8 @@ const updateGroupOpacity = (
   }
 };
 
-
 const Experience = () => {
   //Load models
-  const webModel = useGLTF("./models/scene.gltf");
   const padlockModel = useGLTF("./models/padlock.gltf");
   const mailModel = useGLTF("./models/mail/scene.gltf");
   const techStackTextures = [
@@ -382,17 +378,6 @@ const Experience = () => {
     // ... more projects
   ];
 
-  mailModel.scene.children[0]?.children[0].traverse(function (child) {
-    if (child.isMesh) {
-      child.castShadow = true;
-    }
-  });
-  webModel.scene.children[0]?.children[0].traverse(function (child) {
-    if (child.isMesh) {
-      child.castShadow = true;
-    }
-  });
-
   //Load texture
   const searchtexture = useLoader(THREE.TextureLoader, "./images/search.png");
   const imageicontexture = useLoader(
@@ -424,14 +409,12 @@ const Experience = () => {
   const star2 = useRef();
   const star3 = useRef();
   const star4 = useRef();
-  const allgroup = useRef();
-  const maingroup = useRef();
-  const servicesgroup = useRef();
-  const projectgroup = useRef();
-  const webmodelref = useRef();
-  const contactgroup = useRef();
+  const allgroup = useRef<Group>();
+  const maingroup = useRef<Group>();
+  const servicesgroup = useRef<Group>();
+  const projectgroup = useRef<Group>();
+  const contactgroup = useRef<Group>();
   const selectedProjectRef = useRef(null);
-  const isDialogOpen = !!selectedProjectRef.current;
 
   // Function to calculate the target scale based on scroll percentage
   const getTargetScale = (scrollPercent: number) => {
@@ -547,13 +530,13 @@ const Experience = () => {
       //   deviceOnt.alpha = (e.alpha / 360) * 0.5;
       //   deviceOnt.beta = (e.beta / 180) * 0.5;
       //   deviceOnt.gamma = (e.gamma / 90) * 0.5;
-      
+
       if (!e.rotationRate) {
         return;
       }
-      deviceOnt.alpha = e.rotationRate.alpha || 0
-      deviceOnt.beta = e.rotationRate.beta || 0
-      deviceOnt.gamma = e.rotationRate.gamma || 0
+      deviceOnt.alpha = e.rotationRate.alpha || 0;
+      deviceOnt.beta = e.rotationRate.beta || 0;
+      deviceOnt.gamma = e.rotationRate.gamma || 0;
     });
 
     return () => {
@@ -565,30 +548,26 @@ const Experience = () => {
   }, []);
 
   useFrame((state, delta) => {
-    
     //change camera on move move
     if (deviceOnt.alpha && windowSizes.width < 768) {
       // Adjust these multipliers to control sensitivity
-    const sensitivity = { x: 0.1, y: 0.1 };
-    // Dead zone threshold
-    const deadZone = 0.1;
-    // Apply dead zone
-    let dx = Math.abs(deviceOnt.beta) > deadZone ? deviceOnt.beta : 0;
-    let dy = Math.abs(deviceOnt.alpha) > deadZone ? deviceOnt.alpha : 0;
+      const sensitivity = { x: 0.1, y: 0.1 };
+      // Dead zone threshold
+      const deadZone = 0.1;
+      // Apply dead zone
+      let dx = Math.abs(deviceOnt.beta) > deadZone ? deviceOnt.beta : 0;
+      let dy = -Math.abs(deviceOnt.alpha) > deadZone ? deviceOnt.alpha : 0;
 
-    // Map rotation rate to camera movement
-    state.camera.position.z += dx * sensitivity.x * delta;
-    state.camera.position.y += dy * sensitivity.y * delta;
+      // Map rotation rate to camera movement
+      state.camera.position.z += dx * sensitivity.x * delta;
+      state.camera.position.y += dy * sensitivity.y * delta;
 
-    // Smoothly interpolate back to original position
-    state.camera.position.z *= 0.9; // Adjust for smoother return
-    state.camera.position.y *= 0.9;
+      // Smoothly interpolate back to original position
+      state.camera.position.z *= 0.9; // Adjust for smoother return
+      state.camera.position.y *= 0.9;
 
-    // Ensure the camera looks at a specific point (e.g., the origin)
-    state.camera.lookAt(0, 0, 0);
-
-    
-      
+      // Ensure the camera looks at a specific point (e.g., the origin)
+      state.camera.lookAt(0, 0, 0);
 
       //   console.log("pX-Mobile", pX);
       // console.log("pY-Mobile", pY);
@@ -605,7 +584,7 @@ const Experience = () => {
     //animation
     gear.current.rotation.x += delta * 0.4;
     pieGreen.current.rotation.x += delta * 0.6;
-    webmodelref.current.rotation.y += delta * 0.4;
+
     if (Math.sin(state.clock.elapsedTime * 2) * 0.2 < 0) {
       star1.current.position.x =
         Math.sin(state.clock.elapsedTime * 2) * 0.2 - 1.11;
@@ -624,7 +603,7 @@ const Experience = () => {
     }
 
     // console.log(scrollPer.current);
-    
+
     //Animations based on scroll percentage
     //Scroll 1% - 10%
     if (windowSizes.width >= 768) {
@@ -643,11 +622,40 @@ const Experience = () => {
       );
     }
 
-    updateGroupPosition(maingroup, 31, 100, windowSizes.width >= 768 ? 26 : 90, scrollPer, 0.1, 0);
+    updateGroupPosition(
+      maingroup,
+      31,
+      100,
+      windowSizes.width >= 768 ? 26 : 90,
+      scrollPer,
+      0.1,
+      0
+    );
 
-    updateGroupOpacity(servicesgroup, 37, 38, windowSizes.width >= 768 ? 70 : 84, windowSizes.width >= 768 ? 71 : 85, scrollPer.current);
-    updateGroupOpacity(projectgroup,windowSizes.width >= 768 ? 70 : 84, windowSizes.width >= 768 ? 71 : 85, windowSizes.width >= 768 ? 78 : 92, windowSizes.width >= 768 ? 79 : 93, scrollPer.current);
-    updateGroupOpacity(contactgroup, windowSizes.width >= 768 ? 78 : 92, windowSizes.width >= 768 ? 79 : 93, 101, 101, scrollPer.current);
+    updateGroupOpacity(
+      servicesgroup,
+      37,
+      38,
+      windowSizes.width >= 768 ? 70 : 84,
+      windowSizes.width >= 768 ? 71 : 85,
+      scrollPer.current
+    );
+    updateGroupOpacity(
+      projectgroup,
+      windowSizes.width >= 768 ? 70 : 84,
+      windowSizes.width >= 768 ? 71 : 85,
+      windowSizes.width >= 768 ? 78 : 92,
+      windowSizes.width >= 768 ? 79 : 93,
+      scrollPer.current
+    );
+    updateGroupOpacity(
+      contactgroup,
+      windowSizes.width >= 768 ? 78 : 92,
+      windowSizes.width >= 768 ? 79 : 93,
+      101,
+      101,
+      scrollPer.current
+    );
 
     // // scroll 31% - 52%
     // if (scrollPer.current > 31 && scrollPer.current <= 52) {
@@ -736,55 +744,129 @@ const Experience = () => {
         />
 
         {/* Services */}
-        <group ref={servicesgroup} position={[0, windowSizes.width >= 768 ? -6 : -10, 0]}>
-          <Text
-            position={[-0.11, windowSizes.width >= 768 ? 2.3 : 2, windowSizes.width >= 768 ? -2 : 0]}
-            fontSize={windowSizes.width >= 768 ? 0.35 : 0.5}
-            rotation-y={-Math.PI * 0.5}
-            color={"grey"}
+        <Suspense
+          fallback={
+            <Html position={[0, windowSizes.width >= 768 ? -6 : -10, 0]}>
+              <div className="custom-loader"></div>
+            </Html>
+          }
+        >
+          <group
+            ref={servicesgroup}
+            position={[0, windowSizes.width >= 768 ? -6 : -10, 0]}
           >
-            Services I can help you with
-          </Text>
-          {services.map((service, index) => (
-            <ServiceCard key={index} scrollPer={scrollPer} size={windowSizes.width >= 768 ? [2.45, 1.4, 0.1] : [7.9, 3.8, 0.1]} {...service} />
-          ))}
-          {/* Random balls and circles */}
-          <Ball scale={6} position={[windowSizes.width >= 768 ?0 : 1, windowSizes.width >= 768 ? 1 : -10, windowSizes.width >= 768 ? -3 : -4.5]} color="orange" />
-          <Ball scale={8} position={[3, windowSizes.width >= 768 ? 1 : -16, windowSizes.width >= 768 ? 2.5 : 5.5]} color="lightgreen" />
-          {/* Add more balls and circles */}
-        </group>
+            <Text
+              position={[
+                -0.11,
+                windowSizes.width >= 768 ? 2.3 : 2,
+                windowSizes.width >= 768 ? -2 : 0,
+              ]}
+              fontSize={windowSizes.width >= 768 ? 0.35 : 0.5}
+              rotation-y={-Math.PI * 0.5}
+              color={"grey"}
+            >
+              Services I can help you with
+            </Text>
+            {services.map((service, index) => (
+              <ServiceCard
+                key={index}
+                scrollPer={scrollPer}
+                size={
+                  windowSizes.width >= 768 ? [2.45, 1.4, 0.1] : [7.9, 3.8, 0.1]
+                }
+                {...service}
+              />
+            ))}
+            {/* Random balls and circles */}
+            <Ball
+              scale={6}
+              position={[
+                windowSizes.width >= 768 ? 0 : 1,
+                windowSizes.width >= 768 ? 1 : -10,
+                windowSizes.width >= 768 ? -3 : -4.5,
+              ]}
+              color="orange"
+            />
+            <Ball
+              scale={8}
+              position={[
+                3,
+                windowSizes.width >= 768 ? 1 : -16,
+                windowSizes.width >= 768 ? 2.5 : 5.5,
+              ]}
+              color="lightgreen"
+            />
+            {/* Add more balls and circles */}
+          </group>
+        </Suspense>
 
         {/* Projects */}
-        <group ref={projectgroup} position={[0, windowSizes.width >= 768 ? -16 : -75, 0]}>
-          <ProjectCarousel
-            projects={projects}
-            selectedProjectRef={selectedProjectRef}
-          />
-        </group>
+        <Suspense
+          fallback={
+            <Html position={[0, windowSizes.width >= 768 ? -16 : -75, 0]}>
+              <div className="custom-loader"></div>
+            </Html>
+          }
+        >
+          <group
+            ref={projectgroup}
+            position={[0, windowSizes.width >= 768 ? -16 : -75, 0]}
+          >
+            <ProjectCarousel
+              projects={projects}
+              selectedProjectRef={selectedProjectRef}
+            />
+          </group>
+        </Suspense>
 
         {/* Contact section */}
-        <group ref={contactgroup} position={[0, windowSizes.width >= 768 ? -23 : -87, 0]} scale={windowSizes.width >= 768 ? 1 : (windowSizes.width >= 520 ? 1.4 : 1.8)}>
-          <mesh position={[0, 0, 0]} >
-            {/* Replace with your desired geometry */}
-            {/* <boxGeometry args={[3, 3, 3]} />
-        <meshStandardMaterial color="blue" /> */}
-            <Html
-              transform
-              position={[0, 0, 0]}
-              scale={ 0.4 }
-              rotation-y={-Math.PI * 0.5}
-              style={{ opacity: 1, transition: "opacity 0.5s" }}
-            >
-              <ContactForm />
-              <ProjectDetails />
+        <Suspense
+          fallback={
+            <Html position={[0, windowSizes.width >= 768 ? -23 : -87, 0]}>
+              <div className="custom-loader"></div>
             </Html>
-          </mesh>
-          <Ball scale={windowSizes.width >= 768 ? 6 : 4} position={ [windowSizes.width >= 768 ? 0 : 2.5, -3, -4]} color="orange" />
-          <Ball scale={12} position={ [3, -1, 4.5]} color="lightgreen" />
-          <SocialIcons />
-        </group>
+          }
+        >
+          <group
+            ref={contactgroup}
+            position={[0, windowSizes.width >= 768 ? -23 : -87, 0]}
+            scale={
+              windowSizes.width >= 768
+                ? 1
+                : windowSizes.width >= 520
+                ? 1.4
+                : 1.8
+            }
+          >
+            <mesh position={[0, 0, 0]}>
+              {/* Replace with your desired geometry */}
+              {/* <boxGeometry args={[3, 3, 3]} />
+        <meshStandardMaterial color="blue" /> */}
+              <Html
+                transform
+                position={[0, 0, 0]}
+                scale={0.4}
+                rotation-y={-Math.PI * 0.5}
+                style={{ opacity: 1, transition: "opacity 0.5s" }}
+              >
+                <ContactForm />
+                <ProjectDetails />
+              </Html>
+            </mesh>
+            <Ball
+              scale={windowSizes.width >= 768 ? 6 : 4}
+              position={[windowSizes.width >= 768 ? 0 : 2.5, -3, -4]}
+              color="orange"
+            />
+            <Ball scale={12} position={[3, -1, 4.5]} color="lightgreen" />
+            <SocialIcons />
+          </group>
+        </Suspense>
 
-        <group ref={allgroup} position={[0, windowSizes.width >= 768 ? 0 : 3, 0]}>
+        <group
+          ref={allgroup}
+          position={[0, windowSizes.width >= 768 ? 0 : 3, 0]}
+        >
           {/* Main browser screen */}
           <mesh
             position-y={1}
@@ -1188,12 +1270,15 @@ const Experience = () => {
           </mesh>
 
           {/* Web Model */}
-          <primitive
-            ref={webmodelref}
-            object={webModel.scene}
-            scale={0.15}
-            position={[-0.5, 0.1, -3.7]}
-          />
+          <Suspense
+            fallback={
+              <Html position={[-0.5, 0.1, -3.7]}>
+                <div className="custom-loader"></div>
+              </Html>
+            }
+          >
+            <WebModel position={[-0.5, 0.1, -3.7]} />
+          </Suspense>
 
           {/* Padlock Model */}
           <primitive

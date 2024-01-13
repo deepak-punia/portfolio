@@ -12,6 +12,7 @@
     "@headlessui/react": "^1.7.18",
     "@react-three/drei": "^9.32.3",
     "@react-three/fiber": "^8.8.7",
+    "@types/three": "^0.160.0",
     "@use-gesture/react": "^10.3.0",
     "leva": "^0.9.35",
     "next": "14.0.4",

@@ -3,8 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import Experience from "./Experience";
 import { Leva } from "leva";
 import { Html } from "@react-three/drei";
-import { Suspense, useEffect, useState } from "react";
-import * as THREE from "three";
+import { Suspense } from "react";
 import useisMobile from "./hooks/useisMobile";
 
 const Hero = () => {
@@ -28,13 +27,13 @@ const Hero = () => {
     window.scrollTo({ top: targetScrollY, behavior: "smooth" });
   };
 
-  if (isMobile === undefined) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="custom-loader"></div>
-      </div>
-    );
-  }
+  // if (isMobile === undefined) {
+  //   return (
+  //     <div className="w-full h-screen flex items-center justify-center">
+  //       <div className="custom-loader"></div>
+  //     </div>
+  //   );
+  // }
   return (
     <div className="homepage">
       <section className="bg-white dark:bg-gray-900">
@@ -109,31 +108,37 @@ const Hero = () => {
         </div>
       </section>
       <div className="d-container">
-        <div className="webgl">
-          {/* Can hide Leva with hidden param */}
-          <Leva hidden={true} />
-          <Canvas
-            camera={{
-              fov: 60,
-              zoom: isMobile ? 1 : 0.5,
-              near: 0.5,
-              far: 200,
-              position: [-6, 0, 0],
-            }}
-            shadows
-          >
-            {/* Fallback loader if models are loading */}
-            <Suspense
-              fallback={
-                <Html center>
-                  <div className="custom-loader"></div>
-                </Html>
-              }
+        {isMobile === undefined ? (
+          <div className="w-full h-screen flex items-center justify-center">
+            <div className="custom-loader"></div>
+          </div>
+        ) : (
+          <div className="webgl">
+            {/* Can hide Leva with hidden param */}
+            <Leva hidden={true} />
+            <Canvas
+              camera={{
+                fov: 60,
+                zoom: isMobile ? 1 : 0.5,
+                near: 0.5,
+                far: 200,
+                position: [-6, 0, 0],
+              }}
+              shadows
             >
-              <Experience />
-            </Suspense>
-          </Canvas>
-        </div>
+              {/* Fallback loader if models are loading */}
+              <Suspense
+                fallback={
+                  <Html center>
+                    <div className="custom-loader"></div>
+                  </Html>
+                }
+              >
+                <Experience />
+              </Suspense>
+            </Canvas>
+          </div>
+        )}
       </div>
     </div>
   );

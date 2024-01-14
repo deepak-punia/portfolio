@@ -3,23 +3,18 @@ import React, { Suspense, useEffect, useRef } from "react";
 import { Perf } from "r3f-perf";
 import { useControls } from "leva";
 import * as THREE from "three";
-import {
-  useGLTF,
-  Html,
-  Text,
-} from "@react-three/drei";
+import { useGLTF, Html, Text } from "@react-three/drei";
 import { useFrame, useLoader } from "@react-three/fiber";
 import TechStackRing from "./TechStackRing";
 import ServiceCard from "./services/ServiceCard";
 import Ball from "./Ball";
 import ProjectCarousel from "./projects/ProjectCarousel";
-import ProjectDetails from "./ProjectDetails";
 import SocialIcons from "./SocialIcons";
 import ContactForm from "./ContactForm";
 import WebModel from "./WebModel";
 
 // Types import
-import { Group } from 'three';
+import { Group, Material, Mesh, Object3D } from "three";
 
 // scoll percentage function
 function getScrollPercentage() {
@@ -49,9 +44,9 @@ function getScrollPercentage() {
 }
 //fade in/out with scrool
 const updateGroupOpacity = (
-  group,
-  fadeInStart : number,
-  fadeInEnd : number,
+  group: React.RefObject<Group>,
+  fadeInStart: number,
+  fadeInEnd: number,
   fadeOutStart: number,
   fadeOutEnd: number,
   scrollPer: number
@@ -71,12 +66,17 @@ const updateGroupOpacity = (
     }
     // Update opacity for all materials in the group
     group.current.traverse((child) => {
-      if (child.isMesh) {
-        child.material.opacity = opacity;
-        child.material.transparent = true;
-        // if (opacity < 1) {
-        //   child.material.depthWrite = false;
-        // }
+      if ((child as any).isMesh) {
+        const mesh = child as Mesh;
+
+        if (mesh.material instanceof Material) {
+          mesh.material.opacity = opacity;
+          mesh.material.transparent = true;
+          // Set depthWrite to false if opacity is less than 1
+          // if (opacity < 1) {
+          //   mesh.material.depthWrite = false;
+          // }
+        }
       }
     });
   }
@@ -130,7 +130,16 @@ const Experience = () => {
   ];
 
   // each new card move Y-> -1,5
-  const services = [
+  interface serviceType {
+    icon: string;
+    text: string;
+    heading: string;
+    position: [number, number, number];
+    positionsm: [number, number, number];
+    scrollThrushold: number;
+    scrollThrusholdsm: number;
+  }
+  const services: serviceType[] = [
     {
       icon: "./images/static.png",
       text: "Responsive and static websites using modern technologies.",
@@ -379,14 +388,26 @@ const Experience = () => {
   ];
 
   //Load texture
-  const searchtexture = useLoader(THREE.TextureLoader, "./images/search.png");
+  const searchtexture = useLoader(
+    THREE.TextureLoader as any,
+    "./images/search.png"
+  );
   const imageicontexture = useLoader(
-    THREE.TextureLoader,
+    THREE.TextureLoader as any,
     "./images/imageicon.png"
   );
-  const starTexture = useLoader(THREE.TextureLoader, "./images/star4.png");
-  const circleTexture = useLoader(THREE.TextureLoader, "./images/circle.png");
-  const gearTexture = useLoader(THREE.TextureLoader, "./images/gear.png");
+  const starTexture = useLoader(
+    THREE.TextureLoader as any,
+    "./images/star4.png"
+  );
+  const circleTexture = useLoader(
+    THREE.TextureLoader as any,
+    "./images/circle.png"
+  );
+  const gearTexture = useLoader(
+    THREE.TextureLoader as any,
+    "./images/gear.png"
+  );
 
   //Directional light controls from GUI
   const { directLightPosition } = useControls({
@@ -398,22 +419,22 @@ const Experience = () => {
   // useHelper(lighthelper, THREE.DirectionalLightHelper, "cyan");
 
   // Animations
-  const gear = useRef();
-  const lock = useRef();
-  const yellowBall = useRef();
-  const pieGreen = useRef();
-  const row1 = useRef();
-  const row2 = useRef();
-  const row3 = useRef();
-  const star1 = useRef();
-  const star2 = useRef();
-  const star3 = useRef();
-  const star4 = useRef();
-  const allgroup = useRef<Group>();
-  const maingroup = useRef<Group>();
-  const servicesgroup = useRef<Group>();
-  const projectgroup = useRef<Group>();
-  const contactgroup = useRef<Group>();
+  const gear = useRef<Mesh>(null);
+  const lock = useRef<Object3D>(null);
+  const yellowBall = useRef<Mesh>(null);
+  const pieGreen = useRef<Mesh>(null);
+  const row1 = useRef<Mesh>(null);
+  const row2 = useRef<Mesh>(null);
+  const row3 = useRef<Mesh>(null);
+  const star1 = useRef<Mesh>(null);
+  const star2 = useRef<Mesh>(null);
+  const star3 = useRef<Mesh>(null);
+  const star4 = useRef<Mesh>(null);
+  const allgroup = useRef<Group>(null);
+  const maingroup = useRef<Group>(null);
+  const servicesgroup = useRef<Group>(null);
+  const projectgroup = useRef<Group>(null);
+  const contactgroup = useRef<Group>(null);
   const selectedProjectRef = useRef(null);
 
   // Function to calculate the target scale based on scroll percentage
@@ -458,13 +479,13 @@ const Experience = () => {
   //   }
   // };
   const updateGroupPosition = (
-    group,
-    startScroll,
-    endScroll,
-    maxPosY,
-    scrollPer,
+    group: React.RefObject<Group>,
+    startScroll: number,
+    endScroll: number,
+    maxPosY: number,
+    scrollPer: React.MutableRefObject<number>,
     lerpFactor = 0.1,
-    defaultPosY
+    defaultPosY: number
   ) => {
     if (group.current) {
       let targetY;
@@ -549,15 +570,15 @@ const Experience = () => {
 
   useFrame((state, delta) => {
     //change camera on move move
-    if (deviceOnt.alpha && windowSizes.width < 768) {
+    if (deviceOnt.alpha && deviceOnt.beta && windowSizes.width < 768) {
       // Adjust these multipliers to control sensitivity
       const sensitivity = { x: 0.1, y: 0.1 };
       // Dead zone threshold
       const deadZone = 0.1;
       // Apply dead zone
-      let dx = Math.abs(deviceOnt.beta) > deadZone ? - deviceOnt.beta : 0;
+      let dx = Math.abs(deviceOnt.beta) > deadZone ? -deviceOnt.beta : 0;
       let dy = Math.abs(deviceOnt.alpha) > deadZone ? deviceOnt.alpha : 0;
-      
+
       // Map rotation rate to camera movement
       state.camera.position.z += dx * sensitivity.x * delta;
       state.camera.position.y += dy * sensitivity.y * delta;
@@ -582,22 +603,26 @@ const Experience = () => {
     }
 
     //animation
-    gear.current.rotation.x += delta * 0.4;
-    pieGreen.current.rotation.x += delta * 0.6;
+    if (gear.current) {
+      gear.current.rotation.x += delta * 0.4;
+    }
+    if (pieGreen.current) {
+      pieGreen.current.rotation.x += delta * 0.6;
+    }
 
-    if (Math.sin(state.clock.elapsedTime * 2) * 0.2 < 0) {
+    if (Math.sin(state.clock.elapsedTime * 2) * 0.2 < 0 && star1.current) {
       star1.current.position.x =
         Math.sin(state.clock.elapsedTime * 2) * 0.2 - 1.11;
     }
-    if (Math.sin(state.clock.elapsedTime * 2.1) * 0.2 < 0) {
+    if (Math.sin(state.clock.elapsedTime * 2.1) * 0.2 < 0 && star2.current) {
       star2.current.position.x =
         Math.sin(state.clock.elapsedTime * 2.1) * 0.2 - 1.11;
     }
-    if (Math.sin(state.clock.elapsedTime * 2.2) * 0.2 < 0) {
+    if (Math.sin(state.clock.elapsedTime * 2.2) * 0.2 < 0 && star3.current) {
       star3.current.position.x =
         Math.sin(state.clock.elapsedTime * 2.2) * 0.2 - 1.11;
     }
-    if (Math.sin(state.clock.elapsedTime * 2.3) * 0.2 < 0) {
+    if (Math.sin(state.clock.elapsedTime * 2.3) * 0.2 < 0 && star4.current) {
       star4.current.position.x =
         Math.sin(state.clock.elapsedTime * 2.3) * 0.2 - 1.11;
     }
@@ -606,7 +631,7 @@ const Experience = () => {
 
     //Animations based on scroll percentage
     //Scroll 1% - 10%
-    if (windowSizes.width >= 768) {
+    if (windowSizes.width >= 768 && allgroup.current) {
       let scaleTemp = allgroup.current.scale.x;
       const targetScale = getTargetScale(scrollPer.current);
 
@@ -850,7 +875,6 @@ const Experience = () => {
                 style={{ opacity: 1, transition: "opacity 0.5s" }}
               >
                 <ContactForm />
-                <ProjectDetails />
               </Html>
             </mesh>
             <Ball

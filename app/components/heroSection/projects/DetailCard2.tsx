@@ -1,13 +1,29 @@
-const DetailCard2 = ({ project }) => {
+interface propTypes {
+  project: {
+    title: string;
+    description: string;
+    image: string;
+    video: string;
+    technologies: string[];
+    features: string[];
+    link: string;
+    sourceCode: string;
+  };
+}
+const DetailCard2 = ({ project }: propTypes) => {
   return (
     <div className="bg-white flex flex-col items-start w-[672px] text-3xl md:text-base">
       <div className="flex gap-2 items-start justify-center mb-3 pt-2 flex-col md:flex-row">
-        <span className="font-semibold text-gray-700 min-w-28">Description: </span>
+        <span className="font-semibold text-gray-700 min-w-28">
+          Description:{" "}
+        </span>
         <span className="text-gray-500">{project.description}</span>
       </div>
 
       <div className="flex gap-2 items-start justify-center mb-3 pt-2 flex-col md:flex-row">
-        <span className="font-semibold text-gray-700 min-w-28">Technologies: </span>
+        <span className="font-semibold text-gray-700 min-w-28">
+          Technologies:{" "}
+        </span>
         <span className="text-gray-500">
           {project.technologies.map((tech, index) => {
             if (project.technologies.length === index + 1) return <>{tech}.</>;

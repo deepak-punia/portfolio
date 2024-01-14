@@ -1,27 +1,39 @@
 import { useFrame } from "@react-three/fiber";
 import ProjectCard from "./ProjectCard";
 import * as THREE from "three";
-import { useRef } from "react";
+import { useRef, MutableRefObject } from "react";
 import RotationControl from "./RotationControl";
 import useProjectStore from "../../stores/useProject";
 import ProjectDetails from "./ProjectDetails";
 import { useGesture } from "@use-gesture/react";
 
-
-const ProjectCarousel = ({ projects, selectedProjectRef }) => {
+interface propTypes {
+  projects: {
+    title: string;
+    description: string;
+    image: string;
+    video: string;
+    technologies: string[];
+    features: string[];
+    link: string;
+    sourceCode: string;
+  }[];
+  selectedProjectRef: MutableRefObject<null>;
+}
+const ProjectCarousel = ({ projects, selectedProjectRef }: propTypes) => {
   const isMobile = window.innerWidth >= 768;
   // to keeo track of histry pushed into broswer stack
   const historyPushed = useRef(false);
   const visible = useProjectStore((state) => state.visible);
-  const groupRef = useRef();
-  const allgroupRef = useRef();
+  const groupRef = useRef<THREE.Group>(null);
+  const allgroupRef = useRef<THREE.Group>(null);
   const targetRotationRef = useRef(0);
   const currentRotationRef = useRef(0);
   const lerpFactor = 0.05; // Adjust for smoother or faster rotation
 
   const rotateStep = (Math.PI * 2) / projects.length; // Rotation step based on number of projects
 
-  const rotateCarousel = (direction) => {
+  const rotateCarousel = (direction: number) => {
     targetRotationRef.current += direction * rotateStep;
     // Rotate left or right
   };
@@ -49,19 +61,24 @@ const ProjectCarousel = ({ projects, selectedProjectRef }) => {
       targetRotationRef.current,
       lerpFactor
     );
-    groupRef.current.rotation.y = currentRotationRef.current;
+    if (groupRef.current) {
+      groupRef.current.rotation.y = currentRotationRef.current;
+    }
 
     const targetposition = visible ? -12 : 0;
 
-    allgroupRef.current.position.z = THREE.MathUtils.lerp(
-      allgroupRef.current.position.z,
-      targetposition,
-      0.1
-    );
+    if (allgroupRef.current) {
+      allgroupRef.current.position.z = THREE.MathUtils.lerp(
+        allgroupRef.current.position.z,
+        targetposition,
+        0.1
+      );
+    }
   });
 
   return (
     <>
+      {/* @ts-ignore */}
       <group ref={allgroupRef} {...bind()}>
         <group ref={groupRef}>
           {projects.map((project, index) => {
@@ -80,13 +97,21 @@ const ProjectCarousel = ({ projects, selectedProjectRef }) => {
           })}
         </group>
         <RotationControl
-          position={[isMobile ? 0 : -2.4, isMobile ? 0 : -3, isMobile ? 4.5 : 2]}
+          position={[
+            isMobile ? 0 : -2.4,
+            isMobile ? 0 : -3,
+            isMobile ? 4.5 : 2,
+          ]}
           rotation={[0, -Math.PI * 0.5, 0]}
           onClick={() => rotateCarousel(-1)}
           icon="./images/right.png"
         />
         <RotationControl
-          position={[isMobile ? 0 : -2.4, isMobile ? 0 : -3, isMobile ? -4.5 : -2]}
+          position={[
+            isMobile ? 0 : -2.4,
+            isMobile ? 0 : -3,
+            isMobile ? -4.5 : -2,
+          ]}
           rotation={[0, -Math.PI * 0.5, 0]}
           onClick={() => rotateCarousel(1)}
           icon="./images/left.png"

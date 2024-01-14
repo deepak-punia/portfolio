@@ -1,10 +1,26 @@
-"use client"
+"use client";
 import { useMemo } from "react";
 import AddText from "./AddText";
 import TechStackSquare from "./TechStackSquare";
-import useisMobile from "./hooks/useisMobile";
 
-const TechStackRing = ({ techStackTextures, ellipse, scrollPer }) => {
+interface propTypes {
+  techStackTextures: {
+    textureimg: string;
+    text: string;
+    scrollThrushold: number;
+  }[];
+  ellipse: {
+    a: number;
+    b: number;
+  };
+  scrollPer: React.MutableRefObject<number>;
+}
+
+const TechStackRing = ({
+  techStackTextures,
+  ellipse,
+  scrollPer,
+}: propTypes) => {
   const isMobile = window.innerWidth >= 768;
 
   let squares;
@@ -27,7 +43,7 @@ const TechStackRing = ({ techStackTextures, ellipse, scrollPer }) => {
       }
       temp.push(
         <AddText
-        key={Math.random()}
+          key={Math.random()}
           position={[-0.11, 2.1, 0]}
           fontSize={0.3}
           scrollPer={scrollPer}
@@ -57,7 +73,7 @@ const TechStackRing = ({ techStackTextures, ellipse, scrollPer }) => {
       }
       temp.push(
         <AddText
-        key={Math.random()}
+          key={Math.random()}
           position={[-0.11, 1.7, 0]}
           fontSize={0.5}
           scrollPer={scrollPer}

@@ -3,21 +3,25 @@ import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { Html } from "@react-three/drei";
 
-const VideoMesh = ({ videoUrl, scale, position }) => {
+interface propTypes {
+  videoUrl: string;
+  scale: number;
+  position: [number, number, number];
+}
+const VideoMesh = ({ videoUrl, scale, position }: propTypes) => {
   // Ref for the mesh
-  const meshRef = useRef();
-  const loaderRef = useRef();
+  const meshRef = useRef<THREE.Mesh>(null);
+  const loaderRef = useRef<THREE.Group>(null);
   const loading = useRef(true);
   const video = document.createElement("video");
 
-  const videoTextureRef = useRef();
+  const videoTextureRef = useRef<THREE.VideoTexture | null>(null);
   // Create video element
   useEffect(() => {
     video.src = videoUrl;
     video.load();
     video.onloadeddata = (event) => {
       loading.current = false;
-
     };
     video.play();
     video.crossOrigin = "anonymous";

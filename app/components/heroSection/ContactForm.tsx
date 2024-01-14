@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import useProjectStore from "../stores/useProject";
-import useisMobile from "./hooks/useisMobile";
 
 // scoll percentage function
 function getScrollPercentage() {
@@ -41,7 +40,7 @@ const ContactForm = () => {
   const [loading, setLoading] = useState(false);
   const delayed = useProjectStore((state) => state.visible);
   const isMobile = window.innerWidth >= 768;
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(false);

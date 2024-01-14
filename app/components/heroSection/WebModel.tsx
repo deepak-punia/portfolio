@@ -1,18 +1,24 @@
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import React, { useRef } from "react";
+import { Object3D } from "three";
 
-const WebModel = ({ position }) => {
+interface propTypes {
+  position: [number, number, number];
+}
+const WebModel = ({ position }: propTypes) => {
   const webModel = useGLTF("./models/scene.gltf");
-  const webmodelref = useRef();
-  webModel.scene.children[0]?.children[0].traverse(function (child) {
-    if (child.isMesh) {
+  const webmodelref = useRef<Object3D>(null);
+  webModel.scene.children[0]?.children[0].traverse(function (child: Object3D) {
+    if ((child as any).isMesh) {
       child.castShadow = true;
     }
   });
 
   useFrame((state, delta) => {
-    webmodelref.current.rotation.y += delta * 0.4;
+    if (webmodelref.current) {
+      webmodelref.current.rotation.y += delta * 0.4;
+    }
   });
   return (
     <primitive

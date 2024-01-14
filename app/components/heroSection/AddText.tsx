@@ -2,17 +2,26 @@ import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import { MutableRefObject } from "react";
 
-const AddText = ({ position, fontSize, scrollPer, text }) => {
-  const textRef = useRef();
+interface propTypes {
+  position: [number, number, number];
+  fontSize: number;
+  scrollPer: MutableRefObject<number>;
+  text: string;
+}
+const AddText = ({ position, fontSize, scrollPer, text }: propTypes) => {
+  const textRef = useRef<THREE.Object3D>(null);
 
   // Animate square visibility
   useFrame(() => {
     const visible = scrollPer.current >= 11 && scrollPer.current <= 35;
-    textRef.current.scale.lerp(
-      new THREE.Vector3(visible ? 1 : 0, visible ? 1 : 0, visible ? 1 : 0),
-      0.1
-    );
+    if (textRef.current) {
+      textRef.current.scale.lerp(
+        new THREE.Vector3(visible ? 1 : 0, visible ? 1 : 0, visible ? 1 : 0),
+        0.1
+      );
+    }
   });
 
   return (

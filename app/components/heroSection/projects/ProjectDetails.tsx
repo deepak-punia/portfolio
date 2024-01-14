@@ -1,11 +1,10 @@
 import { Html, Plane, Text } from "@react-three/drei";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useLoader, ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import useProjectStore from "../../stores/useProject";
 import VideoMesh from "./VideoMesh";
 import DetailCard2 from "./DetailCard2";
-import { Suspense, useEffect, useRef } from "react";
-import useisMobile from "../hooks/useisMobile";
+import { Suspense, useEffect, useRef, MutableRefObject } from "react";
 
 function getScrollPercentage() {
   // Total document height
@@ -33,35 +32,45 @@ function getScrollPercentage() {
   return scrollPercentage;
 }
 
-const ProjectDetails = ({historyPushed}) => {
+interface propTypes {
+  historyPushed: MutableRefObject<boolean>;
+}
+const ProjectDetails = ({ historyPushed }: propTypes) => {
   const isMobile = window.innerWidth >= 768;
-  const texture = useLoader(THREE.TextureLoader, "./images/left.png");
-  const textureGit = useLoader(THREE.TextureLoader, "./images/github.png");
+  const texture = useLoader(THREE.TextureLoader as any, "./images/left.png");
+  const textureGit = useLoader(
+    THREE.TextureLoader as any,
+    "./images/github.png"
+  );
   const project = useProjectStore((state) => state.project);
   const setVisible = useProjectStore((state) => state.hideDialog);
   const visible = useProjectStore((state) => state.visible);
-  const onPointerOver = (e) => {
+  const onPointerOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     document.body.style.cursor = "pointer";
-    e.object.material.color.set("#4d4d4d");
+    if (e.object instanceof THREE.Mesh) {
+      e.object.material.color.set("#4d4d4d");
+    }
   };
 
-  const onPointerOut = (e) => {
+  const onPointerOut = (e: ThreeEvent<PointerEvent>) => {
     document.body.style.cursor = "default";
-    e.object.material.color.set("#878787");
+    if (e.object instanceof THREE.Mesh) {
+      e.object.material.color.set("#878787");
+    }
   };
 
-  const onPointerOverGit = (e) => {
+  const onPointerOverGit = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     document.body.style.cursor = "pointer";
   };
 
-  const onPointerOutGit = (e) => {
+  const onPointerOutGit = (e: ThreeEvent<PointerEvent>) => {
     document.body.style.cursor = "default";
   };
 
   const scrollPer = useRef(0);
-  
+
   useEffect(() => {
     if (!historyPushed.current) {
       // Push a new entry into the history stack
@@ -70,8 +79,7 @@ const ProjectDetails = ({historyPushed}) => {
     }
 
     // Define the function to execute when the back button is pressed
-    const handleBackButton = (event) => {
-      
+    const handleBackButton = (event: any) => {
       // Your custom logic here
       setVisible();
       historyPushed.current = false;
@@ -79,10 +87,9 @@ const ProjectDetails = ({historyPushed}) => {
 
       // Push it again in the history stack, effectively "ignoring" the back action
       window.history.pushState(null, document.title, window.location.href);
-      
     };
     // Add event listener for popstate
-    window.addEventListener('popstate', handleBackButton);
+    window.addEventListener("popstate", handleBackButton);
 
     window.addEventListener("scroll", (e) => {
       scrollPer.current = getScrollPercentage();
@@ -97,7 +104,7 @@ const ProjectDetails = ({historyPushed}) => {
 
     return () => {
       window.removeEventListener("scroll", () => {});
-      window.removeEventListener('popstate', handleBackButton);
+      window.removeEventListener("popstate", handleBackButton);
     };
   }, []);
 
@@ -131,7 +138,7 @@ const ProjectDetails = ({historyPushed}) => {
         <VideoMesh
           position={isMobile ? [0, 0.7, 11.5] : [0, 0.7, 12]}
           scale={isMobile ? 1 : 1.75}
-          videoUrl={project.video}
+          videoUrl={project?.video ? project.video : ""}
         />
       </Suspense>
 
@@ -142,7 +149,7 @@ const ProjectDetails = ({historyPushed}) => {
         color="darkgrey"
         scale={isMobile ? 1 : 1.7}
       >
-        {project.title}
+        {project?.title}
       </Text>
 
       {/* Replace with your desired geometry */}
@@ -166,7 +173,7 @@ const ProjectDetails = ({historyPushed}) => {
         position={isMobile ? [0, -0.68, 14.22] : [0, -5.68, 8]}
         rotation={[0, -Math.PI * 0.5, 0]}
         onClick={() => {
-          window.open(project.sourceCode, "_blank", "noreferrer");
+          window.open(project?.sourceCode, "_blank", "noreferrer");
         }}
       >
         <meshStandardMaterial map={textureGit} transparent />

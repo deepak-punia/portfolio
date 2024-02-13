@@ -133,6 +133,8 @@ body {
 .homepage{
   height: 400vh;
   width: 100%; 
+  max-width: 1535px;
+  margin: auto;
 }
 
 @media screen and (max-width: 768px) {
